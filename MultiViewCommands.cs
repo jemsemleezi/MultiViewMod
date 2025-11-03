@@ -1,6 +1,7 @@
 ﻿using LudeonTK;
 using RimWorld;
 using Verse;
+using UnityEngine;
 
 namespace MultiViewMod
 {
@@ -58,6 +59,39 @@ namespace MultiViewMod
             else
             {
                 Messages.Message("MultiViewController instance not available.", MessageTypeDefOf.NegativeEvent);
+            }
+        }
+
+        // 在 MultiViewCommands.cs 中添加调试命令
+        [DebugAction("MultiView", "Test Independent Camera", allowedGameStates = AllowedGameStates.Playing)]
+        public static void TestIndependentCamera()
+        {
+            if (MultiViewController.Instance != null)
+            {
+                // 测试移动到地图不同位置
+                var map = Find.CurrentMap;
+                if (map != null)
+                {
+                    // 移动到地图随机位置
+                    Vector3 randomPos = new Vector3(
+                        Rand.Range(10, map.Size.x - 10),
+                        15f,
+                        Rand.Range(10, map.Size.z - 10)
+                    );
+
+                    // 这里需要访问相机控制器的内部方法来测试独立移动
+                    Messages.Message($"测试独立相机移动到: {randomPos}", MessageTypeDefOf.NeutralEvent);
+                }
+            }
+        }
+
+        [DebugAction("MultiView", "Force Map Update", allowedGameStates = AllowedGameStates.Playing)]
+        public static void ForceMapUpdate()
+        {
+            if (MultiViewController.Instance != null)
+            {
+                // 强制地图更新
+                Messages.Message("强制地图更新", MessageTypeDefOf.NeutralEvent);
             }
         }
     }

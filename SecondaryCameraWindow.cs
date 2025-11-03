@@ -14,7 +14,7 @@ namespace MultiViewMod
         private Vector2 lastMousePosition;
         private bool isDraggingView;
         private int updateCounter = 0;
-        private const int UPDATE_INTERVAL = 3;
+        private const int UPDATE_INTERVAL = 1;//纹理渲染频率
 
         public string windowTitle = "MultiViewMod_WindowTitle".Translate();
         public Pawn followTarget;
@@ -185,8 +185,14 @@ namespace MultiViewMod
                 RenderTexture renderTexture = cameraController?.GetRenderTexture();
                 if (renderTexture != null)
                 {
-                    // 修复拖影：使用更稳定的绘制方式
-                    Graphics.DrawTexture(inRect, renderTexture, new Rect(0, 0, 1, 1), 0, 0, 0, 0, GUI.color, null);
+                    // 直接使用环世界的绘制方法，不调整颜色
+                    Widgets.DrawTextureFitted(inRect, renderTexture, 1.0f,
+                        new Vector2(renderTexture.width, renderTexture.height),
+                        new Rect(0, 0, 1, 1));
+
+                    // 方法2：使用不同的混合模式
+                    //Graphics.DrawTexture(inRect, renderTexture, new Rect(0, 0, 1, 1), 0, 0, 0, 0,
+                    //    new Color(0.7f, 0.7f, 0.7f, 1f), null);
                 }
                 else
                 {

@@ -62,6 +62,29 @@ namespace MultiViewMod
         }
 
         /// <summary>
+        /// 清理已关闭的窗口
+        /// </summary>
+        private void CleanupClosedWindows()
+        {
+            try
+            {
+                // 移除所有已经关闭的窗口
+                for (int i = openWindows.Count - 1; i >= 0; i--)
+                {
+                    var window = openWindows[i];
+                    if (window == null || !Find.WindowStack.IsOpen(window))
+                    {
+                        openWindows.RemoveAt(i);
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Log.Error($"[MultiViewMod] Cleanup closed windows failed: {e}");
+            }
+        }
+
+        /// <summary>
         /// 处理快捷键输入
         /// </summary>
         private void HandleHotkeys()
@@ -77,16 +100,31 @@ namespace MultiViewMod
                     return;
                 }
 
-                // 打开窗口快捷键 - 始终可用
+                // 在检查快捷键之前先清理已关闭的窗口
+                CleanupClosedWindows();
+
+                // 打开/关闭窗口快捷键 - 切换功能
                 if (MultiViewMod.Settings.OpenWindowHotkey && MultiViewKeyBindings.MultiView_OpenWindow.JustPressed)
                 {
-                    CreateNewObservationWindow();
+                    if (openWindows.Count > 0)
+                    {
+                        // 有窗口时关闭最顶部窗口
+                        CloseTopWindow();
+                        Messages.Message("MultiViewMod_WindowClosed".Translate(), MessageTypeDefOf.NeutralEvent);
+                    }
+                    else
+                    {
+                        // 无窗口时创建新窗口
+                        CreateNewObservationWindow();
+                        Messages.Message("MultiViewMod_WindowOpened".Translate(), MessageTypeDefOf.NeutralEvent);
+                    }
                 }
 
                 // 关闭窗口快捷键 - 有窗口时才关闭，无窗口时给出提示
                 // 检查窗口是否固定，固定窗口不能被快捷键关闭
                 if (MultiViewMod.Settings.CloseWindowHotkey && MultiViewKeyBindings.MultiView_CloseWindow.JustPressed)
                 {
+                    CleanupClosedWindows(); // 再次清理确保状态正确
                     if (openWindows.Count > 0)
                     {
                         var topWindow = openWindows[openWindows.Count - 1];
@@ -108,6 +146,7 @@ namespace MultiViewMod
                         }
 
                         CloseTopWindow();
+                        Messages.Message("MultiViewMod_WindowClosed".Translate(), MessageTypeDefOf.NeutralEvent);
                     }
                     else
                     {
@@ -281,6 +320,9 @@ namespace MultiViewMod
                     return;
                 }
 
+                // 先清理已关闭的窗口，确保状态正确
+                CleanupClosedWindows();
+
                 SecondaryCameraWindow newWindow = new SecondaryCameraWindow(cameraController);
 
                 // 应用自动跟随设置
@@ -389,6 +431,9 @@ namespace MultiViewMod
         {
             try
             {
+                // 清理所有注册的视口
+                SecondaryViewportManager.ClearAllViewports();
+
                 if (cameraController != null)
                 {
                     cameraController.Cleanup();

@@ -39,6 +39,11 @@ namespace MultiViewMod
         public float SavedZoomLevel = 12f;
         public bool HasSavedZoom = false;
 
+        // 后处理控制选项
+        public bool EnablePostProcessing = true;
+        public bool SyncPostProcessing = true;
+        public float PostProcessingIntensity = 1.0f;
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -71,6 +76,11 @@ namespace MultiViewMod
             // 保存缩放比例
             Scribe_Values.Look(ref SavedZoomLevel, "SavedZoomLevel", 12f);
             Scribe_Values.Look(ref HasSavedZoom, "HasSavedZoom", false);
+
+            // 后处理控制
+            Scribe_Values.Look(ref EnablePostProcessing, "EnablePostProcessing", true);
+            Scribe_Values.Look(ref SyncPostProcessing, "SyncPostProcessing", true);
+            Scribe_Values.Look(ref PostProcessingIntensity, "PostProcessingIntensity", 1.0f);
 
             // 仅保留关键日志
             // Log.Message($"[MultiViewMod] 设置已{(Scribe.mode == LoadSaveMode.Saving ? "保存" : "加载")}");
